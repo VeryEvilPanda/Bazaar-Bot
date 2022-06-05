@@ -7,12 +7,14 @@ import json
 
 load_dotenv()
 
+#Defines the two APIs used in this bot
 bazaarResponse = requests.get('https://api.slothpixel.me/api/skyblock/bazaar')
 bazaarData = json.loads(bazaarResponse.text)
 
 itemsResponse = requests.get('https://api.hypixel.net/resources/skyblock/items')
 itemsData = json.loads(itemsResponse.text)
 
+#Function used later simply to check that the price is a number
 def isFloat(num):
     try:
         float(num)
@@ -20,13 +22,7 @@ def isFloat(num):
     except ValueError:
         return False
 
-def checkPrice(itemID, value):
-    buyPrice = bazaarData[itemID]['quick_status']['buyPrice']
-    if buyPrice > value:
-        return True
-    else:
-        return False
-
+#Functions to get data from the APIs
 def getID(itemName):
     for item in itemsData['items']:
        if item['name'].lower() == itemName.lower():
@@ -38,18 +34,20 @@ def getName(itemID):
            return item['name']
 
 def getBazaar(itemID):
+    #This can be used to check if a Skyblock item is available in the bazaar
     if itemID not in bazaarData:
         return None
     sellPrice = round(bazaarData[itemID]['quick_status']['sellPrice'], 1)
     buyPrice = round(bazaarData[itemID]['quick_status']['buyPrice'], 1)
     return sellPrice, buyPrice
 
-
+#Define intents for bot
 intents = disnake.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.reactions = True
 
+#Define the bot
 bot = commands.Bot(
     command_prefix='-',
     test_guilds=[777652457059647498, 982360255973449789],
@@ -68,6 +66,7 @@ async def on_ready():
     await notifyTask.start()
 
 
+#Task to check price of all items in the notifier list
 @tasks.loop(seconds=60.0)
 async def notifyTask():
     with open('bazaar_bot.txt', 'r') as notifyList:
@@ -86,6 +85,7 @@ async def notifyTask():
                 print(f"[LOG] Notifier triggered: {user.name} ({user.id}), {line[1]}")
 
 
+#Slash command for checking the price of items in bazaar
 @bot.slash_command()
 async def item(inter, name):
     """
@@ -129,11 +129,12 @@ async def item(inter, name):
             itemEmbed.set_thumbnail(url=f"https://evilpanda.me/files/data.png")
         await inter.response.send_message(embed=itemEmbed)
 
-
+#Main slash command for notifiers
 @bot.slash_command()
 async def notify(inter):
     pass
 
+#Sub command for creating a notifier
 @notify.sub_command()
 async def add(inter, name, price):
     """
@@ -186,6 +187,7 @@ async def add(inter, name, price):
         successEmbed.set_thumbnail(url='https://evilpanda.me/files/notify.png')
         await inter.response.send_message(embed=successEmbed)
 
+#Sub command for removing a notifier
 @notify.sub_command()
 async def remove(inter, name):
     """
@@ -227,6 +229,7 @@ async def remove(inter, name):
         removeEmbed.set_footer(text="Bazaar Bot • EvilPanda#7288", icon_url=panda.avatar)
         await inter.response.send_message(embed=removeEmbed)
 
+#Sub command for listing all notifiers
 @notify.sub_command()
 async def list(inter):
     """
@@ -258,10 +261,11 @@ async def list(inter):
                     description=f"Could not find any notifiers for this discord account. Try creating one with `/notify add`!",
                     color=0xff0000)
             listEmbed.set_thumbnail(url="https://evilpanda.me/files/notfound.png")
+            #We do a little trolling
             listEmbed.set_image(url="https://evilpanda.me/files/no_notifiers.jpg")
         panda = await bot.fetch_user(554343055029698571)
         listEmbed.set_footer(text="Bazaar Bot • EvilPanda#7288", icon_url=panda.avatar)
         await inter.response.send_message(embed=listEmbed)
 
-
+#Runs the bot using token from .env file
 bot.run(os.getenv("TOKEN"))
