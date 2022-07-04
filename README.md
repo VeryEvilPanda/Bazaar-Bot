@@ -6,6 +6,8 @@
 
 - After the nerf to sniping bazaar insta-sells this bot is kinda useless but I'll leave it here because it could be useful.
 
+- Fun fact: i actually exposed the token for my testing bot when uploading this. Luckily Discord immediately spotted this and changed it automatically lol.
+
 
 ## Environment Variables
 
