@@ -20,10 +20,11 @@ To run this project, you will need to add the following environment variables to
 
 ## Installation
 
-- Install disnake and python-dotenv using pip:
+- Install these using pip:
 ```bash
   pip3 install disnake
   pip3 install python-dotenv
+  pip3 install requests
 ```
 - Download the files from github and unzip them
 - Paste your token into a .env file in the same directory:
